@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>私の広辞苑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf7f2;
+    --paper: #fffef9;
+    --ink: #1a1208;
+    --ink-light: #5a4e3a;
+    --ink-muted: #9a8e7a;
+    --accent: #8b1a1a;
+    --accent-soft: #c44;
+    --gold: #b8860b;
+    --gold-light: #f5e6a3;
+    --border: #d4c9b0;
+    --border-soft: #e8e0d0;
+    --shadow: rgba(26,18,8,0.08);
+    --reading-width: 680px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Serif JP', serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 59px,
+        rgba(180,160,120,0.08) 59px,
+        rgba(180,160,120,0.08) 60px
+      );
+  }
+
+  /* ── ヘッダー ── */
+  header {
+    background: var(--ink);
+    color: var(--gold-light);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+    border-right: 1px solid rgba(184,134,11,0.4);
+    padding-right: 16px;
+    line-height: 1.4;
+  }
+
+  .logo span {
+    display: block;
+    font-size: 0.55rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 0.2em;
+    color: var(--ink-muted);
+    color: rgba(184,134,11,0.7);
+    font-weight: 300;
+  }
+
+  .search-bar {
+    flex: 1;
+    position: relative;
+  }
+
+  .search-bar input {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(184,134,11,0.3);
+    border-radius: 3px;
+    padding: 7px 36px 7px 12px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.9rem;
+    color: var(--gold-light);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-bar input::placeholder { color: rgba(245,230,163,0.4); }
+  .search-bar input:focus { border-color: var(--gold); }
+
+  .search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(184,134,11,0.6);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  /* タブ */
+  nav.tabs {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid rgba(184,134,11,0.15);
+  }
+
+  nav.tabs button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: rgba(245,230,163,0.55);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    padding: 7px 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    position: relative;
+  }
+
+  nav.tabs button:hover { color: var(--gold-light); }
+
+  nav.tabs button.active {
+    color: var(--gold-light);
+    border-bottom: 2px solid var(--gold);
+  }
+
+  /* ── メインレイアウト ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── 一覧ビュー ── */
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stats-bar .count {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+
+  .filter-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--ink);
+    color: var(--gold-light);
+    border-color: var(--ink);
+  }
+
+  /* 辞書風リスト */
+  .dict-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .dict-entry {
+    background: var(--paper);
+    border: 1px solid var(--border-soft);
+    border-bottom: none;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .dict-entry:first-child { border-radius: 4px 4px 0 0; }
+  .dict-entry:last-child { border-radius: 0 0 4px 4px; border-bottom: 1px solid var(--border-soft); }
+  .dict-entry:only-child { border-radius: 4px; border-bottom: 1px solid var(--border-soft); }
+
+  .dict-entry:hover { background: #fdf9f0; }
+
+  .entry-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .entry-word {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .entry-reading {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+  }
+
+  .entry-tags {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+
+  .tag {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.65rem;
+    padding: 1px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  .tag-cat {
+    background: var(--gold-light);
+    color: var(--gold);
+    border: 1px solid rgba(184,134,11,0.3);
+  }
+
+  .tag-mem {
+    background: #e8f4e8;
+    color: #2a6a2a;
+    border: 1px solid rgba(42,106,42,0.25);
+  }
+
+  .entry-def {
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    line-height: 1.75;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .entry-actions {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .dict-entry:hover .entry-actions { opacity: 1; }
+
+  .btn-icon {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-icon.del:hover { border-color: #c00; color: #c00; }
+
+  /* 空状態 */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-muted);
+  }
+
+  .empty-state .big { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; line-height: 1.8; }
+
+  /* ── 追加ビュー ── */
+  .add-form {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 32px 36px;
+    box-shadow: 0 2px 16px var(--shadow);
+  }
+
+  .form-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 5px;
+  }
+
+  label span.req { color: var(--accent); margin-left: 2px; }
+
+  input[type=text], textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 9px 12px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type=text]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    background: var(--paper);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.8;
+  }
+
+  .inline-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .mem-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .mem-check input { width: auto; }
+  .mem-check label {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    letter-spacing: 0;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 11px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-primary:hover { background: #a01a1a; }
+
+  /* ── フラッシュカードビュー ── */
+  .flash-wrap {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .flash-progress {
+    text-align: center;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    margin-bottom: 20px;
+  }
+
+  .flash-progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .flash-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .flashcard-scene {
+    perspective: 1200px;
+    margin-bottom: 24px;
+  }
+
+  .flashcard {
+    position: relative;
+    height: 280px;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+  }
+
+  .flashcard.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    background: var(--paper);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    box-shadow: 0 4px 24px var(--shadow), 0 1px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .card-face.back { transform: rotateY(180deg); justify-content: flex-start; overflow-y: auto; }
+
+  .card-hint {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-muted);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .card-word {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .card-reading {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  .card-def {
+    font-size: 0.88rem;
+    line-height: 1.9;
+    color: var(--ink-light);
+    text-align: left;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .card-def-word {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .flash-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .flash-btn {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.05em;
+  }
+
+  .flash-btn.again { background: #fff0f0; color: #c00; border: 1px solid #ffd0d0; }
+  .flash-btn.again:hover { background: #ffd0d0; }
+  .flash-btn.good  { background: #f0fff0; color: #2a6a2a; border: 1px solid #b0e0b0; }
+  .flash-btn.good:hover { background: #c0e8c0; }
+  .flash-btn.skip  { background: var(--bg); color: var(--ink-muted); border: 1px solid var(--border); }
+
+  .flash-action-row {
+    text-align: center;
+  }
+
+  .flash-flip-hint {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .flash-done {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .flash-done .big { font-size: 3rem; margin-bottom: 12px; }
+  .flash-done h2 { font-size: 1.1rem; margin-bottom: 8px; }
+  .flash-done p { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 24px; }
+
+  .flash-filter-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* ── モーダル（詳細・編集）── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.55);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    border-radius: 6px;
+    max-width: 580px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    animation: modalIn 0.22s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .modal-word { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .modal-reading { font-size: 0.8rem; color: var(--ink-muted); font-family: 'Noto Sans JP', sans-serif; margin-top: 2px; }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: var(--ink-muted);
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  .modal-body { padding: 20px 24px 24px; }
+
+  .modal-section-label {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+
+  .modal-def {
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--ink);
+    white-space: pre-wrap;
+    background: var(--bg);
+    padding: 12px 14px;
+    border-radius: 3px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .modal-meta {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+  }
+
+  .modal-footer {
+    padding: 12px 24px;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .btn-secondary {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 7px 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.82rem;
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* トースト */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    background: var(--ink);
+    color: var(--gold-light);
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    z-index: 999;
+    transform: translateY(60px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── 絞り込み ── */
+  .no-results {
+    text-align: center;
+    padding: 40px;
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+  }
+
+  /* レスポンシブ */
+  @media (max-width: 520px) {
+    .inline-row { grid-template-columns: 1fr; }
+    .add-form { padding: 20px; }
+    .header-inner { padding: 8px 12px; }
+    .logo { font-size: 1.1rem; }
+    main { padding: 16px 10px 60px; }
+    .card-word { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      私の広辞苑
+      <span>MY PERSONAL DICTIONARY</span>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="ことばを検索…" oninput="onSearch()">
+      <span class="search-icon">🔍</span>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="active" onclick="switchTab('list')">📖　一覧</button>
+    <button onclick="switchTab('add')">✏️　追加</button>
+    <button onclick="switchTab('flash')">🃏　暗記</button>
+  </nav>
+</header>
+
+<main>
+  <!-- 一覧 -->
+  <div id="view-list" class="view active">
+    <div class="stats-bar">
+      <span class="count" id="countLabel">0 語</span>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setFilter('all',this)">すべて</button>
+        <button class="filter-btn" onclick="setFilter('未習得',this)">未習得</button>
+        <button class="filter-btn" onclick="setFilter('習得済',this)">習得済</button>
+      </div>
+    </div>
+    <div class="dict-list" id="dictList"></div>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="big">📖</div>
+      <p>まだ登録されたことばがありません。<br>「追加」タブから最初のことばを登録してみましょう。</p>
+    </div>
+  </div>
+
+  <!-- 追加 -->
+  <div id="view-add" class="view">
+    <div class="add-form">
+      <div class="form-title" id="formTitle">新しいことばを登録</div>
+      <div class="inline-row">
+        <div class="form-group">
+          <label>ことば<span class="req">*</span></label>
+          <input type="text" id="fWord" placeholder="例：忖度">
+        </div>
+        <div class="form-group">
+          <label>読み仮名</label>
+          <input type="text" id="fReading" placeholder="例：そんたく">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>広辞苑の意味<span class="req">*</span></label>
+        <textarea id="fDef" placeholder="広辞苑や辞書の定義をここに貼り付け…"></textarea>
+      </div>
+      <div class="inline-row">
+        <div class="form-group">
+          <label>カテゴリ（任意）</label>
+          <input type="text" id="fCat" placeholder="例：法律、医療、日常">
+        </div>
+        <div class="form-group">
+          <label>メモ（任意）</label>
+          <input type="text" id="fMemo" placeholder="使い方・例文など">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="mem-check">
+          <input type="checkbox" id="fLearned">
+          <label for="fLearned">習得済みとしてマーク</label>
+        </div>
+      </div>
+      <input type="hidden" id="editId">
+      <button class="btn-primary" onclick="saveEntry()">登録する</button>
+    </div>
+  </div>
+
+  <!-- フラッシュカード -->
+  <div id="view-flash" class="view">
+    <div class="flash-wrap">
+      <div class="flash-filter-row" id="flashFilterRow">
+        <button class="filter-btn active" onclick="setFlashFilter('all',this)">すべて</button>
+        <button class="filter-btn" onclick="setFlashFilter('未習得',this)">未習得のみ</button>
+      </div>
+      <div id="flashInner"></div>
+    </div>
+  </div>
+</main>
+
+<!-- 詳細モーダル -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-word" id="mWord"></div>
+        <div class="modal-reading" id="mReading"></div>
+      </div>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-label">意　味</div>
+      <div class="modal-def" id="mDef"></div>
+      <div id="mMemoSection">
+        <div class="modal-section-label">メ　モ</div>
+        <div class="modal-meta" id="mMemo"></div>
+      </div>
+      <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap" id="mMeta"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="editFromModal()">編集</button>
+      <button class="btn-secondary" style="color:#c00;border-color:#ffd0d0" onclick="deleteFromModal()">削除</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── データ管理 ──
+const STORAGE_KEY = 'kojien_entries_v1';
+let entries = [];
+let currentFilter = 'all';
+let flashFilter = 'all';
+let flashQueue = [];
+let flashIdx = 0;
+let flashFlipped = false;
+let currentModalId = null;
+let editingId = null;
+
+function load() {
+  try { entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { entries = []; }
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+
+function nextId() { return Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+
+// ── 一覧 ──
+function renderList() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = entries;
+  if (currentFilter === '未習得') list = list.filter(e => !e.learned);
+  if (currentFilter === '習得済')  list = list.filter(e =>  e.learned);
+  if (q) list = list.filter(e =>
+    e.word.toLowerCase().includes(q) ||
+    (e.reading||'').includes(q) ||
+    (e.def||'').includes(q) ||
+    (e.cat||'').includes(q)
+  );
+
+  // 五十音順
+  list = [...list].sort((a,b) => (a.reading||a.word).localeCompare(b.reading||b.word, 'ja'));
+
+  document.getElementById('countLabel').textContent = `${list.length} 語`;
+  const el = document.getElementById('dictList');
+  const empty = document.getElementById('emptyState');
+
+  if (list.length === 0) {
+    el.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  el.innerHTML = list.map(e => `
+    <div class="dict-entry" onclick="openDetail('${e.id}')">
+      <div class="entry-head">
+        <span class="entry-word">${escHtml(e.word)}</span>
+        ${e.reading ? `<span class="entry-reading">【${escHtml(e.reading)}】</span>` : ''}
+        <div class="entry-tags">
+          ${e.cat ? `<span class="tag tag-cat">${escHtml(e.cat)}</span>` : ''}
+          ${e.learned ? `<span class="tag tag-mem">習得済</span>` : ''}
+        </div>
+      </div>
+      <div class="entry-def">${escHtml(e.def)}</div>
+      <div class="entry-actions">
+        <button class="btn-icon" onclick="event.stopPropagation();startEdit('${e.id}')">編集</button>
+        <button class="btn-icon del" onclick="event.stopPropagation();deleteEntry('${e.id}')">削除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.stats-bar .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function onSearch() { renderList(); }
+
+// ── 追加・編集 ──
+function switchTab(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('nav.tabs button').forEach((b,i) => b.classList.remove('active'));
+  const idx = {list:0, add:1, flash:2}[name];
+  document.querySelectorAll('nav.tabs button')[idx].classList.add('active');
+  if (name === 'flash') initFlash();
+  if (name === 'list') renderList();
+}
+
+function resetForm() {
+  ['fWord','fReading','fDef','fCat','fMemo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fLearned').checked = false;
+  document.getElementById('editId').value = '';
+  document.getElementById('formTitle').textContent = '新しいことばを登録';
+  editingId = null;
+}
+
+function saveEntry() {
+  const word = document.getElementById('fWord').value.trim();
+  const def  = document.getElementById('fDef').value.trim();
+  if (!word || !def) { showToast('ことばと意味は必須です'); return; }
+
+  const id = document.getElementById('editId').value;
+  const obj = {
+    id: id || nextId(),
+    word,
+    reading: document.getElementById('fReading').value.trim(),
+    def,
+    cat:    document.getElementById('fCat').value.trim(),
+    memo:   document.getElementById('fMemo').value.trim(),
+    learned: document.getElementById('fLearned').checked,
+    createdAt: id ? (entries.find(e=>e.id===id)?.createdAt || Date.now()) : Date.now(),
+  };
+
+  if (id) {
+    const idx = entries.findIndex(e => e.id === id);
+    if (idx > -1) entries[idx] = obj;
+    showToast('更新しました');
+  } else {
+    entries.push(obj);
+    showToast(`「${word}」を登録しました`);
+  }
+  save();
+  resetForm();
+  switchTab('list');
+}
+
+function startEdit(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('fWord').value    = e.word;
+  document.getElementById('fReading').value = e.reading || '';
+  document.getElementById('fDef').value     = e.def;
+  document.getElementById('fCat').value     = e.cat || '';
+  document.getElementById('fMemo').value    = e.memo || '';
+  document.getElementById('fLearned').checked = !!e.learned;
+  document.getElementById('editId').value   = e.id;
+  document.getElementById('formTitle').textContent = '編集：' + e.word;
+  switchTab('add');
+}
+
+function deleteEntry(id) {
+  if (!confirm('このことばを削除しますか？')) return;
+  entries = entries.filter(e => e.id !== id);
+  save();
+  renderList();
+  showToast('削除しました');
+}
+
+// ── モーダル ──
+function openDetail(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  currentModalId = id;
+  document.getElementById('mWord').textContent    = e.word;
+  document.getElementById('mReading').textContent = e.reading ? `【${e.reading}】` : '';
+  document.getElementById('mDef').textContent     = e.def;
+  const memoSec = document.getElementById('mMemoSection');
+  if (e.memo) {
+    document.getElementById('mMemo').textContent = e.memo;
+    memoSec.style.display = '';
+  } else {
+    memoSec.style.display = 'none';
+  }
+  const meta = [];
+  if (e.cat) meta.push(`<span class="tag tag-cat">${escHtml(e.cat)}</span>`);
+  if (e.learned) meta.push(`<span class="tag tag-mem">習得済</span>`);
+  document.getElementById('mMeta').innerHTML = meta.join('');
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('open');
+  currentModalId = null;
+}
+
+function closeModal(e) {
+  if (e.target.id === 'detailModal') closeDetailModal();
+}
+
+function editFromModal() {
+  closeDetailModal();
+  startEdit(currentModalId);
+}
+
+function deleteFromModal() {
+  if (!currentModalId) return;
+  closeDetailModal();
+  deleteEntry(currentModalId);
+}
+
+// ── フラッシュカード ──
+function initFlash() {
+  let pool = entries;
+  if (flashFilter === '未習得') pool = pool.filter(e => !e.learned);
+  // シャッフル
+  flashQueue = [...pool].sort(() => Math.random() - 0.5);
+  flashIdx = 0;
+  flashFlipped = false;
+  renderFlash();
+}
+
+function setFlashFilter(f, btn) {
+  flashFilter = f;
+  document.querySelectorAll('#flashFilterRow .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  initFlash();
+}
+
+function renderFlash() {
+  const wrap = document.getElementById('flashInner');
+  if (flashQueue.length === 0) {
+    wrap.innerHTML = `<div class="flash-done">
+      <div class="big">📖</div>
+      <h2>登録されたことばがありません</h2>
+      <p>「追加」タブからことばを登録してください</p>
+    </div>`;
+    return;
+  }
+  if (flashIdx >= flashQueue.length) {
+    const learnedCount = flashQueue.filter(e => e.learned).length;
+    wrap.innerHTML = `<div class="flash-done">
+      <div class="big">🎉</div>
+      <h2>セッション完了！</h2>
+      <p>${flashQueue.length} 語を確認しました</p>
+      <button class="btn-primary" style="max-width:200px;margin:0 auto" onclick="initFlash()">もう一度</button>
+    </div>`;
+    return;
+  }
+  const e = flashQueue[flashIdx];
+  const prog = Math.round((flashIdx / flashQueue.length) * 100);
+
+  wrap.innerHTML = `
+    <div class="flash-progress">
+      ${flashIdx + 1} / ${flashQueue.length}
+      <div class="flash-progress-bar"><div class="flash-progress-fill" style="width:${prog}%"></div></div>
+    </div>
+    <div class="flashcard-scene">
+      <div class="flashcard ${flashFlipped ? 'flipped' : ''}" id="flashcard" onclick="flipCard()">
+        <div class="card-face front">
+          <div class="card-hint">このことばの意味は？</div>
+          <div class="card-word">${escHtml(e.word)}</div>
+          ${e.reading ? `<div class="card-reading">【${escHtml(e.reading)}】</div>` : ''}
+          ${e.cat ? `<div style="margin-top:12px"><span class="tag tag-cat">${escHtml(e.cat)}</span></div>` : ''}
+        </div>
+        <div class="card-face back">
+          <div class="card-hint" style="width:100%">意　味</div>
+          <div class="card-def-word">${escHtml(e.word)}</div>
+          <div class="card-def">${escHtml(e.def)}</div>
+          ${e.memo ? `<div style="margin-top:10px;font-size:0.78rem;color:var(--ink-muted);font-family:'Noto Sans JP',sans-serif">${escHtml(e.memo)}</div>` : ''}
+        </div>
+      </div>
+    </div>
+    ${flashFlipped ? `
+    <div class="flash-controls">
+      <button class="flash-btn again" onclick="flashAction('again')">もう一度</button>
+      <button class="flash-btn good"  onclick="flashAction('good')">覚えた！</button>
+    </div>
+    ` : `
+    <div class="flash-action-row">
+      <p class="flash-flip-hint">カードをタップして意味を確認</p>
+    </div>
+    `}
+  `;
+}
+
+function flipCard() {
+  if (!flashFlipped) {
+    flashFlipped = true;
+    renderFlash();
+  }
+}
+
+function flashAction(result) {
+  const e = flashQueue[flashIdx];
+  if (result === 'good') {
+    // 習得済みにマーク
+    const idx = entries.findIndex(x => x.id === e.id);
+    if (idx > -1) { entries[idx].learned = true; save(); }
+  } else {
+    // 未習得のままキューの末尾に追加
+    flashQueue.push(e);
+  }
+  flashIdx++;
+  flashFlipped = false;
+  renderFlash();
+}
+
+// ── ユーティリティ ──
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── 初期化 ──
+load();
+renderList();
+
+// キーボードショートカット
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDetailModal();
+});
+</script>
+</body>
+</html>
